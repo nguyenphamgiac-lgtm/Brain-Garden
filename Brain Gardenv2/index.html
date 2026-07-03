@@ -1,786 +1,334 @@
-// Thay đổi URL này thành domain API thực tế của bạn trên Vercel (ví dụ: https://brain-gardenv1.vercel.app/api)
-const API_BASE = "https://aeuxfydbevmxwpkpogzf.supabase.co"; 
-// --- AUDIO ENGINE V2 CLEAN AUTOMATION ---
-const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const audioActiveRegistry = new Set(); 
-function playSound(type) {
-  if (!document.getElementById('soundToggle') || !document.getElementById('soundToggle').checked) return;
-  const osc = audioCtx.createOscillator();
-  const gain = audioCtx.createGain();
-  osc.connect(gain); gain.connect(audioCtx.destination);
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Brain Garden V11.0 - Cyber Automation Ultimate</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- SYSTEM TOAST NOTIFICATIONS -->
+<div id="toastContainer" class="toast-container"></div>
+
+<!-- BACKGROUND MATRIX GLOW EFFECT -->
+<div class="cyber-bg-glow"></div>
+
+<!-- AUTHENTICATION OVERLAY SYSTEM WITH FALLING LEAVES EFFECT -->
+<div id="authOverlay" class="auth-overlay">
+  <div class="leaves-container" id="leavesContainer"></div>
   
-  if (type === 'click') {
-    osc.frequency.setValueAtTime(380, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.05);
-  } else if (type === 'success') {
-    osc.frequency.setValueAtTime(500, audioCtx.currentTime);
-    osc.frequency.setValueAtTime(680, audioCtx.currentTime + 0.07);
-    gain.gain.setValueAtTime(0.04, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.22);
-  } else if (type === 'fail') {
-    osc.frequency.setValueAtTime(140, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
-    osc.start(); osc.stop(audioCtx.currentTime + 0.18);
-  } else if (type === 'hover') {
-    osc.frequency.setValueAtTime(580, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.003, audioCtx.currentTime); 
-    osc.start(); osc.stop(audioCtx.currentTime + 0.02);
-  }
-}
-
-document.addEventListener('mouseover', (e) => {
-  const targetBtn = e.target.closest('button, .card, .node-btn, .menu-btn');
-  if (targetBtn) {
-    if (!audioActiveRegistry.has(targetBtn)) {
-      audioActiveRegistry.add(targetBtn);
-      playSound('hover');
-    }
-  }
-});
-
-document.addEventListener('mouseout', (e) => {
-  const targetBtn = e.target.closest('button, .card, .node-btn, .menu-btn');
-  if (targetBtn) {
-    audioActiveRegistry.delete(targetBtn); 
-  }
-});
-
-document.addEventListener('click', (e) => {
-  if (e.target.closest('button, .card, .node-btn')) {
-    playSound('click');
-  }
-});
-
-// --- MASCOT QUOTES REGISTRY ---
-const MASCOT_MOTIVATION_QUOTES = [
-  "Cố lên nhé sĩ tử, tư duy logic sẽ đưa ta tới thành công!",
-  "Học vấn là chiếc chìa khóa vạn năng mở toang cánh cửa vũ trụ.",
-  "Đừng sợ sai! Mỗi lần vấp ngã là cây tri thức của bạn lại bén rễ sâu hơn.",
-  "Tập trung cao độ nào! Bạn đang làm rất tốt, bộ não đang tiến hóa đó.",
-  "Hãy đọc kỹ dữ kiện câu hỏi nhé, câu trả lời nằm ở sự nhạy bén của bạn."
-];
-
-function refreshMascotSpeech() {
-  const bubble = document.getElementById("mascotBubble");
-  if (bubble) {
-    bubble.innerText = MASCOT_MOTIVATION_QUOTES[Math.floor(Math.random() * MASCOT_MOTIVATION_QUOTES.length)];
-  }
-}
-
-// --- HIỆU ỨNG LÁ RỤNG MÀN HÌNH CHỜ AUTOMATION 🌱 ---
-function initFallingLeaves() {
-  const container = document.getElementById("leavesContainer");
-  if (!container) return;
-  container.innerHTML = "";
-  const leafCount = 18;
-  const colors = ["#10b981", "#34d399", "#059669", "#84cc16", "#f59e0b"];
-  
-  for (let i = 0; i < leafCount; i++) {
-    const leaf = document.createElement("div");
-    leaf.className = "leaf";
-    leaf.style.left = Math.random() * 100 + "%";
-    leaf.style.top = Math.random() * -20 + "%";
-    leaf.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-    leaf.style.transform = `scale(${Math.random() * 0.6 + 0.5})`;
-    leaf.style.animationDelay = Math.random() * 8 + "s";
-    leaf.style.animationDuration = (Math.random() * 5 + 6) + "s";
-    container.appendChild(leaf);
-  }
-}
-
-// --- TOAST NOTIFICATION ENGINE ---
-function showToast(title, text, icon = "🎁", borderType = "#2563eb") {
-  const container = document.getElementById("toastContainer");
-  if(!container) return;
-  const card = document.createElement("div");
-  card.className = "toast-card";
-  card.style.borderLeftColor = borderType;
-  card.innerHTML = `<div style="font-size:1.5rem;">${icon}</div><div><h4 style="font-size:0.85rem;color:#fff;">${title}</h4><p style="font-size:0.75rem;color:#94a3b8;">${text}</p></div>`;
-  container.appendChild(card);
-  setTimeout(() => {
-    card.style.opacity = '0'; card.style.transition = '0.3s';
-    setTimeout(() => card.remove(), 300);
-  }, 3500);
-}
-
-// --- STATE MANAGEMENT ENGINE V12.0 CLOUD ---
-let currentWorld = "";
-let currentQuestionIndex = 0;
-let totalQuestionsInQuest = 10;
-let currentUserData = null;
-let activeLevel = 1;
-let isReviewBattleMode = false;
-let activePool = [];
-let isGuestModeActive = false; 
-
-let activeSessionStats = { correct: 0, wrong: 0, coinsEarned: 0, xpEarned: 0 };
-
-function createNewUserProgress(username, nickname) {
-  return {
-    username: username,
-    nickname: nickname || "Guest Keeper",
-    avatar: "",
-    coins: 100,
-    lives: 3,
-    xp: 0,
-    level: 1,
-    water: 4,
-    fertilizer: 5,
-    freezeCount: 1,
-    streakCount: 0,
-    lastStudiedDate: "",
-    lastLoginDate: "",
-    progress: { math: 1, eng: 1, hist: 1, iq: 1, chem: 1 },
-    clearedNodes: { math: [], eng: [], hist: [], iq: [], chem: [] },
-    garden: { level: 1, exp: 0 }
-  };
-}
-
-function getRequiredXpForUser(lvl) { return 100 * Math.pow(4, lvl - 1); }
-function getRequiredGpForTree(lvl) { return 100 * Math.pow(6, lvl - 1); }
-
-function verifyDailyResetAndStreak() {
-  if (!currentUserData) return;
-  const todayStr = new Date().toISOString().split('T')[0];
-  if (currentUserData.lastLoginDate !== todayStr) {
-    currentUserData.lastLoginDate = todayStr;
-    if (currentUserData.garden.level >= 4) {
-      currentUserData.lives = 4;
-      showToast("Mộc Thần Kích Hoạt Tier 4! ❤️", "Hồi phục toàn bộ 4 mạng sống ngày mới!", "☀️", "#ef4444");
-    } else {
-      currentUserData.lives = 3;
-    }
-  }
-}
-
-async function triggerStreakIncrement() {
-  const todayStr = new Date().toISOString().split('T')[0];
-  if (currentUserData.lastStudiedDate !== todayStr) {
-    currentUserData.streakCount++;
-    currentUserData.lastStudiedDate = todayStr;
-    showToast("Tăng Chuỗi Học Tập! 🔥", `Liên tục đạt: ${currentUserData.streakCount} ngày!`, "⚡", "#f59e0b");
+  <div class="auth-box pop-anim">
+    <div class="auth-header">
+      <button id="tabLogin" class="auth-tab active" onclick="switchAuthTab('login')">Đăng Nhập</button>
+      <button id="tabSignup" class="auth-tab" onclick="switchAuthTab('signup')">Tạo Tài Khoản</button>
+    </div>
     
-    if (currentUserData.garden.level >= 5 && currentUserData.streakCount % 3 === 0) {
-      if (currentUserData.freezeCount < 2) {
-        currentUserData.freezeCount++;
-        showToast("Mộc Thần Kích Hoạt Tier 5! 🥶", "Nhận 1 Băng Bảo Vệ nhờ chuỗi học tập!", "❄️", "#0ea5e9");
-      } else {
-        currentUserData.coins += 50;
-        showToast("Kho Băng Đã Đầy! 💰", "Tự động quy đổi sang +50 Xu thưởng!", "🪙", "#f59e0b");
-      }
-    }
-  }
-  await saveStateToStorage();
-}
-
-function handleGuestLogin() {
-  isGuestModeActive = true;
-  currentUserData = createNewUserProgress("guest_account@braingarden.io", "Học Viên Khách");
-  localStorage.setItem("bg_remembered_session", "guest_session_active");
-  localStorage.setItem("bg_user_guest_session_active", JSON.stringify(currentUserData));
-  bootstrapAppView();
-  showToast("Chế Độ Khách Kích Hoạt! 👥", "Bạn đang trải nghiệm nhanh. Hãy đăng ký tài khoản để lưu dữ liệu đám mây.", "🔓", "#0ea5e9");
-}
-
-// --- HIGH DIFFICULTY PROCEDURAL QUESTIONS ENGINE ---
-function generateProceduralQuestions(world, level, isReview = false) {
-  let list = [];
-  let count = isReview ? 30 : 10;
-  
-  for(let i = 1; i <= count; i++) {
-    let seed = level * 17 + i * 53;
-    
-    if (world === 'math') {
-      let types = [
-        { q: `Cho hình thang cân ABCD (AB // CD) có số đo góc A bằng ${105 + (seed%10)}°. Tính số đo góc C chính xác của hình thang?`, a: `${75 - (seed%10)}°`, wrongs: [`${105 + (seed%10)}°`, "90°", "180°"], ex: "Trong hình thang cân, hai góc đối diện bù nhau, tổng bằng 180°." },
-        { q: `Tam giác ABC có AB = ${4 + (seed%3)} cm, AC = ${8 + (seed%3)} cm. Đường phân giác trong góc A cắt BC tại D. Tính tỷ số độ dài cạnh DB / DC?`, a: "0.5", wrongs: ["2.0", "0.75", "1.25"], ex: "Đường phân giác của một góc trong tam giác chia cạnh đối diện thành hai đoạn thẳng tỷ lệ với hai cạnh kề." },
-        { q: `Định lý Thales: Cho tam giác ABC, một đường thẳng song song với cạnh BC cắt AB tại D và AC tại E. Biết AD = ${3 + (seed%2)} cm, DB = 3 cm, AE = 6 cm. Tính độ dài đoạn EC?`, a: `${parseFloat((18 / (3+(seed%2))).toFixed(2))} cm`, wrongs: ["4.0 cm", "2.5 cm", "5.0 cm"], ex: "Theo định lý Thales trong tam giác: AD/DB = AE/EC." }
-      ];
-      let choice = types[seed % types.length];
-      list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
-    }
-    else if (world === 'chem') {
-      let types = [
-        { q: `Đốt cháy hoàn toàn khí Mêtan (CH₄) trong bình chứa Ôxi dư. Xác định tổng các hệ số cân bằng tối giản của phương trình hóa học?`, a: "6", wrongs: ["5", "4", "7"], ex: "Phản ứng: CH₄ + 2O₂ → CO₂ + 2H₂O. Tổng hệ số: 1 + 2 + 1 + 2 = 6." },
-        { q: `Tính số mol nguyên tử tinh khiết chứa trong khối lượng ${(16.8 + (seed%3)*5.6).toFixed(1)} gam Sắt (Fe = 56)?`, a: `${((16.8 + (seed%3)*5.6) / 56).toFixed(2)} mol`, wrongs: ["0.20 mol", "0.50 mol", "1.00 mol"], ex: "Áp dụng công thức tính toán: n = m / M." }
-      ];
-      let choice = types[seed % types.length];
-      list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
-    }
-    else if (world === 'eng') {
-      let types = [
-        { q: `Identify the grammatical error in the statement: 'The multi-layered tectonic plates moves incredibly slow across the mantle.'`, a: "moves (should be move)", wrongs: ["slow", "across", "multi-layered"], ex: "Chủ ngữ số nhiều 'plates' yêu cầu động từ số nhiều 'move' ở thì hiện tại đơn." },
-        { q: `Choose the correct logical conjunction: 'The advanced laboratory experiment failed twice, ___ the engineering team refused to give up.'`, a: "yet", wrongs: ["because", "so", "or"], ex: "'Yet' biểu thị mối quan hệ tương phản mang tính logic cao giữa hai vế." }
-      ];
-      let choice = types[seed % types.length];
-      list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
-    }
-    else if (world === 'hist') {
-      let types = [
-        { q: `Sự kiện lịch sử lớn nào diễn ra từ năm 1914 đến năm 1918 mở đầu cho cuộc cục diện thế giới mới, mang tính chất đế quốc chủ nghĩa phi nghĩa?`, a: "Chiến tranh Thế giới I", wrongs: ["Chiến tranh Thế giới II", "Cách mạng Tháng Mười Nga", "Chiến tranh Giành Độc lập Bắc Mỹ"], ex: "Chiến tranh Thế giới I diễn ra từ năm 1914 đến năm 1918 giữa khối Liên minh và khối Hiệp ước." },
-        { q: `Sự kiện bùng nổ năm 1939 và kết thúc vào năm 1945 với sự thất bại hoàn toàn của khối Phát xít Đức, Ý, Nhật được gọi là gì?`, a: "Chiến tranh Thế giới II", wrongs: ["Chiến tranh Thế giới I", "Chiến tranh Lạnh", "Cách mạng Tư sản Pháp"], ex: "Chiến tranh Thế giới II bùng nổ ngày 1/9/1939 khi Đức tấn công Ba Lan và kết thúc năm 1945." },
-        { q: `Dưới sự lãnh đạo tài tình của Đảng và Chủ tịch Hồ Chí Minh, cuộc tổng khởi nghĩa nào năm 1945 đã đập tan xiềng xích thực dân phát xít khai sinh ra nước Việt Nam Dân chủ Cộng hòa?`, a: "Cách mạng Tháng Tám", wrongs: ["Khởi nghĩa Yên Bái", "Phong trào Xô viết Nghệ Tĩnh", "Chiến dịch Điện Biên Phủ"], ex: "Cách mạng Tháng Tám năm 1945 giành chính quyền về tay nhân dân toàn quốc." },
-        { q: `Vị anh hùng dân tộc nào đã lãnh đạo nghĩa quân Lam Sơn đánh bại hoàn toàn quân xâm lược nhà Minh, giành lại độc lập và lập ra vương triều Hậu Lê?`, a: "Lê Lợi", wrongs: ["Trần Hưng Đạo", "Quang Trung", "Nguyễn Trãi"], ex: "Anh hùng Lê Lợi lãnh đạo cuộc khởi nghĩa Lam Sơn (1418 - 1427) thắng lợi hoàn toàn." }
-      ];
-      let choice = types[seed % types.length];
-      list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
-    }
-    else {
-      let diffVal = (seed % 4) + 4;
-      let start = level * 3;
-      let s1 = start, s2 = start + diffVal, s3 = start + diffVal * 2, s4 = start + diffVal * 3;
-      let ansVal = start + diffVal * 4;
-      list.push({
-        q: `Giải mã ma trận chuỗi số logic tăng trưởng cấp số cộng sau: ${s1}, ${s2}, ${s3}, ${s4}, [?]. Số cần tìm điền vào dấu hỏi chấm là:`,
-        correct: `${ansVal}`, wrongs: [`${ansVal + diffVal}`, `${ansVal - 1}`, `${ansVal * 2}`],
-        ex: `Quy luật giải mã chuỗi số logic: Số sau bằng số trước cộng thêm một khoảng cách giá trị hằng số cố định là +${diffVal}.`
-      });
-    }
-  }
-  return list;
-}
-
-// --- AUTH CORES CONTROLLER (UPGRADED TO ASYNC VERCEL SERVER) ---
-function switchAuthTab(tab) {
-  document.getElementById('tabLogin').classList.remove('active');
-  document.getElementById('tabSignup').classList.remove('active');
-  document.getElementById('loginForm').style.display = 'none';
-  document.getElementById('signupForm').style.display = 'none';
-  if (tab === 'login') {
-    document.getElementById('tabLogin').classList.add('active');
-    document.getElementById('loginForm').style.display = 'block';
-  } else {
-    document.getElementById('tabSignup').classList.add('active');
-    document.getElementById('signupForm').style.display = 'block';
-  }
-}
-
-async function handleAuth(mode) {
-  if (mode === 'signup') {
-    const nick = document.getElementById("signupNickname").value.trim();
-    const user = document.getElementById("signupUser").value.trim();
-    const pass = document.getElementById("signupPass").value.trim();
-    if (!nick || !user || !pass) { alert("Vui lòng điền đủ trường!"); return; }
-    
-    const freshData = createNewUserProgress(user, nick);
-    
-    try {
-      showToast("Đang xử lý...", "Gửi yêu cầu khởi tạo tài khoản lên hệ thống", "⏳", "#3b82f6");
-      const response = await fetch(`${API_BASE}/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, password: pass, profileData: freshData })
-      });
+    <div id="loginForm" class="auth-form">
+      <h2>Chào Mừng Trở Lại!</h2>
+      <p class="auth-desc">Nhập tài khoản Email để tiếp tục hành trình nâng cấp</p>
+      <input type="text" id="loginUser" placeholder="Email của bạn..." required>
+      <input type="password" id="loginPass" placeholder="Mật khẩu bảo mật..." required>
+      <button class="btn-click unified-btn auth-submit-btn w-100" data-tooltip="Kích hoạt đăng nhập vào kho tri thức" onclick="handleAuth('login')">Vào Học Ngay 🚀</button>
       
-      const resData = await response.json();
-      if (!response.ok) { throw new Error(resData.message || "Lỗi đăng ký khôn lường."); }
+      <div class="guest-separator"><span>Hoặc trải nghiệm nhanh</span></div>
+      <button class="unified-btn guest-btn w-100" data-tooltip="Vào học ngay không cần tạo tài khoản (Dữ liệu lưu tạm)" onclick="handleGuestLogin()">Vào Chế Độ Khách 👥</button>
+    </div>
+
+    <div id="signupForm" class="auth-form" style="display:none;">
+      <h2>Gia Nhập Học Viện</h2>
+      <p class="auth-desc">Đăng ký tài khoản mới đồng bộ dữ liệu đám mây</p>
+      <input type="text" id="signupNickname" placeholder="Biệt danh học viên (Tối đa 24 ký tự)..." maxlength="24" required>
+      <input type="text" id="signupUser" placeholder="Nhập Gmail đăng ký..." required>
+      <input type="password" id="signupPass" placeholder="Tạo mật khẩu an toàn..." required>
+      <button class="btn-click unified-btn auth-submit-btn w-100" data-tooltip="Tạo mới hồ sơ lưu trữ vĩnh viễn" onclick="handleAuth('signup')">Kích Hoạt Tài Khoản 🌱</button>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP INTERFACE -->
+<div class="app" id="mainApp" style="display: none;">
+  <!-- SIDEBAR SYSTEM -->
+  <div class="sidebar">
+    <div class="profile">
+      <div class="avatar-wrapper" data-tooltip="Click biểu tượng máy ảnh để thay đổi và lưu Avatar cá nhân">
+        <img id="avatarImg" class="avatar-img" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23888888'><rect width='24' height='24' fill='%23e0e0e0'/><path d='M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5-4-8-4z'/></svg>" alt="Avatar">
+        <label for="avatarInput" class="avatar-label">📷</label>
+        <input type="file" id="avatarInput" accept="image/*" style="display: none;">
+      </div>
+      <h2 id="displayUsername">🌱 Garden Keeper</h2>
       
-      alert("Đăng ký hồ sơ Cloud thành công! Hãy thực hiện đăng nhập.");
-      switchAuthTab('login');
-    } catch (err) {
-      alert(`Đăng ký thất bại: ${err.message}`);
-    }
-  } else {
-    const user = document.getElementById("loginUser").value.trim();
-    const pass = document.getElementById("loginPass").value.trim();
-    if (!user || !pass) { alert("Vui lòng điền thông tin đăng nhập!"); return; }
-    
-    try {
-      showToast("Đang xác thực...", "Kết nối máy chủ kiểm tra bảo mật", "🔐", "#3b82f6");
-      const response = await fetch(`${API_BASE}/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username: user, password: pass })
-      });
+      <!-- HỆ THỐNG HIỂN THỊ DANH HIỆU (TITLE) -->
+      <div id="userTitleBadge" class="title-badge">Người Mới</div>
       
-      const resData = await response.json();
-      if (!response.ok) { throw new Error(resData.message || "Mật khẩu hoặc tài khoản sai."); }
+      <div id="displayAccount" class="account-sub">nguyenphamgiac@gmail.com</div>
       
-      isGuestModeActive = false;
-      currentUserData = resData.profileData; 
-      localStorage.setItem("bg_remembered_session", user); 
+      <p id="userLevel" style="margin-top: 8px; font-weight:800; color:#3b82f6;">Level 1</p>
+      <div class="xp-bar" data-tooltip="Thanh tiến trình kinh nghiệm học viên"><div class="xp-fill" id="xpFill"></div></div>
+      <small id="xpText" style="font-weight:600; color:#a1a1aa;">0 / 100 XP</small>
+    </div>
+
+    <!-- STATS HUD -->
+    <div class="stats">
+      <div class="stat-row" data-tooltip="Số tiền tích lũy dùng mua tài nguyên">💰 Coins: <span id="coins" class="stat-val">0</span></div>
+      <div class="stat-row" data-tooltip="Mạng sống chiến đấu (Hết mạng sẽ hồi phục lại)">❤️ Lives: <span id="lives" class="stat-val">3</span></div>
+      <div class="stat-row flex-align" id="streakContainer" data-tooltip="Chuỗi số ngày học liên tục không ngắt quãng">
+        <span id="streakIcon">🔥</span> Streak: <span id="streak" class="stat-val">0</span> ngày
+      </div>
+      <div class="stat-row divider"></div>
+      <div class="stat-row flex-row">
+        <span data-tooltip="Nước dùng để tưới cây thần tăng trưởng">💧 Nước: <b id="water" style="color:#60a5fa;">0</b></span>
+        <span data-tooltip="Phân bón siêu cấp tăng mạnh EXP cây">🍂 Phân: <b id="fertilizer" style="color:#f59e0b;">5</b></span>
+      </div>
+      <div class="stat-row flex-row style-freeze" data-tooltip="Bảo vệ chuỗi Streak khi quên học bài">
+        <span>🥶 Băng Bảo Vệ: <b id="freezeCount">1</b> / 2</span>
+      </div>
+    </div>
+
+    <!-- MENU -->
+    <div class="menu">
+      <button class="menu-btn active" data-tooltip="Quay lại Bản đồ thế giới học tập" onclick="switchTab('world')">🏠 World Map</button>
+      <button class="menu-btn" data-tooltip="Ghé thăm Khu vườn sinh thái tri thức của bạn" onclick="switchTab('garden')">🌿 My Garden</button>
+      <button class="menu-btn" data-tooltip="Mở danh sách nhiệm vụ nhận thưởng hằng ngày" onclick="openModal('missionsModal')">⚔️ Daily Missions</button>
+      <button class="menu-btn" data-tooltip="Bảng danh hiệu và thành tựu cá nhân" onclick="openModal('achievementsModal')">🏆 Achievements</button>
+      <button class="menu-btn" data-tooltip="Gửi phản hồi đóng góp phát triển hệ thống" onclick="openModal('feedbackModal')">📨 Feedback</button>
+      <button class="menu-btn" data-tooltip="Tùy chỉnh thông số hệ thống" onclick="openModal('settingsModal')">⚙️ Settings</button>
+      <button class="menu-btn logout-btn" data-tooltip="Đăng xuất và đồng bộ dữ liệu" onclick="handleLogout()">🚪 Đăng xuất</button>
+    </div>
+  </div>
+
+  <!-- MAIN VIEW AREA -->
+  <div class="main">
+    <!-- TAB 1: WORLD MAP -->
+    <div id="worldTab" class="tab-content">
+      <h1 class="title">🌌 Cyber Learning Map</h1>
+      <div class="world-grid" id="world">
+        
+        <div class="card math" data-tooltip="Thử thách tư duy logic toán học hình học cấp độ 1-100" onclick="enterWorld('math')">
+          <div class="card-glow"></div>
+          <h3>🟢 Logic Forest</h3><p>Toán Học (Lv 1 - 100)</p>
+          <div class="progress"><div class="fill" id="progress-math" style="width:0%"></div></div>
+          <svg class="card-watermark" viewBox="0 0 24 24"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 14H8V4h12v12z"/></svg>
+        </div>
+
+        <div class="card eng" data-tooltip="Rèn luyện ngữ pháp và cấu trúc tiếng Anh nâng cao" onclick="enterWorld('eng')">
+          <div class="card-glow"></div>
+          <h3>🟣 Sky Grammar</h3><p>Tiếng Anh (Lv 1 - 100)</p>
+          <div class="progress"><div class="fill" id="progress-eng" style="width:0%"></div></div>
+          <svg class="card-watermark" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.53c-.26-.81-1-1.4-1.9-1.4h-1v-3c0-.55-.45-1-1-1h-6v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/></svg>
+        </div>
+
+        <div class="card hist" data-tooltip="Ngược dòng tìm hiểu các mốc Lịch Sử Lớp 8/9, Chiến tranh Thế giới" onclick="enterWorld('hist')">
+          <div class="card-glow"></div>
+          <h3>🟠 Memory Desert</h3><p>Lịch Sử (Lv 1 - 100)</p>
+          <div class="progress"><div class="fill" id="progress-hist" style="width:0%"></div></div>
+          <svg class="card-watermark" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+        </div>
+
+        <div class="card iq" data-tooltip="Giải mã ma trận chuỗi số và câu đố hóc búa" onclick="enterWorld('iq')">
+          <div class="card-glow"></div>
+          <h3>🔵 Puzzle Ocean</h3><p>Tư Duy Logic (Lv 1 - 100)</p>
+          <div class="progress"><div class="fill" id="progress-iq" style="width:0%"></div></div>
+          <svg class="card-watermark" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.2c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.22 19.58 10.57 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9z"/></svg>
+        </div>
+
+        <div class="card chem" data-tooltip="Hóa học thực nghiệm, cân bằng phản ứng, tính toán mol" onclick="enterWorld('chem')">
+          <div class="card-glow"></div>
+          <h3>🔴 Quantum Lab</h3><p>Hóa Học (Lv 1 - 100)</p>
+          <div class="progress"><div class="fill" id="progress-chem" style="width:0%"></div></div>
+          <svg class="card-watermark" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
+        </div>
+
+        <!-- 3 MÔN HỌC PHÁT TRIỂN COMING SOON -->
+        <div class="card coming-soon-card" data-tooltip="Học phần Tin Học (IT Automation & AI) đang được biên soạn phát triển">
+          <div class="card-glow"></div>
+          <h3>💻 Cyber Informatics</h3><p>Tin Học (Coming Soon)</p>
+          <div class="coming-soon-badge">Giai Đoạn 2</div>
+        </div>
+
+        <div class="card coming-soon-card" data-tooltip="Vật Lý thực nghiệm và Cơ học vũ trụ đang được biên soạn phát triển">
+          <div class="card-glow"></div>
+          <h3>⚡ Quantum Physics</h3><p>Vật Lý (Coming Soon)</p>
+          <div class="coming-soon-badge">Giai Đoạn 2</div>
+        </div>
+
+        <div class="card coming-soon-card" data-tooltip="Văn học phân tích lý luận và cấu trúc văn bản nghệ thuật">
+          <div class="card-glow"></div>
+          <h3>✍️ Advanced Literature</h3><p>Ngữ Văn (Coming Soon)</p>
+          <div class="coming-soon-badge">Giai Đoạn 2</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ZONE LEVELS CONTENT -->
+    <div class="zone" id="zone" style="display: none;">
+      <div class="zone-header">
+        <div>
+          <h1 class="title" id="zoneTitle">WORLD ACADEMY</h1>
+        </div>
+        <button class="btn-click unified-btn secondary-btn" data-tooltip="Quay về danh sách môn học chính" onclick="back()">⬅ Quay Lại Map</button>
+      </div>
       
-      bootstrapAppView();
-      showToast("Đăng Nhập Thành Công! 🎉", `Đã đồng bộ hóa dữ liệu từ Server Cloud về máy này.`, "🔑", "#2563eb");
-    } catch (err) {
-      alert(`Đăng nhập thất bại: ${err.message}`);
-    }
-  }
-}
+      <div class="node-zone-wrapper">
+        <div class="node-grid" id="nodeMapContainer"></div>
+      </div>
 
-function bootstrapAppView() {
-  document.getElementById("authOverlay").style.display = "none";
-  document.getElementById("mainApp").style.display = "flex";
-  
-  document.getElementById("displayUsername").innerText = currentUserData.nickname || "Garden Keeper";
-  document.getElementById("displayAccount").innerText = currentUserData.username;
-  
-  if (currentUserData.avatar) {
-    document.getElementById("avatarImg").src = currentUserData.avatar;
-  }
-  
-  verifyDailyResetAndStreak();
-  updateStatsUI();
-  syncWorldProgressFill();
-  renderTitlesModalData(); 
-}
+      <div class="zone-warning-bottom">
+        ⚠️ Các ải đã hoàn thành có thể học lại nhưng sẽ không phát thêm điểm thưởng tránh spam.
+      </div>
+    </div>
 
-document.getElementById('avatarInput').addEventListener('change', function(e) {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = async function(uploadEvent) {
-      const base64Str = uploadEvent.target.result;
-      document.getElementById('avatarImg').src = base64Str;
-      if (currentUserData) {
-        currentUserData.avatar = base64Str;
-        await saveStateToStorage();
-        showToast("Đã Lưu Avatar! 📷", "Ảnh đại diện cá nhân đã được đồng bộ vĩnh viễn lên Cloud.", "✔️", "#10b981");
-      }
-    };
-    reader.readAsDataURL(file);
-  }
-});
+    <!-- TAB 2: GARDEN UPGRADE SYSTEM -->
+    <div id="gardenTab" class="tab-content" style="display: none;">
+      <h1 class="title">🌿 Thần Thoại Sân Vườn <span class="subtitle">Hệ Thống Tiến Hóa 🧬</span></h1>
+      <div class="garden-premium-wrapper">
+        <div class="garden-container animate-glowing">
+          <div class="garden-lvl-tag">Garden Tier <span id="gardenLvlText">1</span></div>
+          
+          <div class="tree-display">
+            <div class="biotech-aura">
+              <div id="treeStage" class="character-sway premium-emoji">🌱</div>
+            </div>
+            <h2 id="treeName" class="neon-text-green">Mầm Thần Khai Sáng</h2>
+            <p id="treeDesc" style="font-size:0.85rem; color:#94a3b8; margin-top:4px; max-width:280px; margin-inline:auto;">Đang hấp thu năng lượng tri thức vũ trụ.</p>
+            
+            <div class="progress" style="position:static; width: 100%; margin: 20px auto 5px auto;"><div id="treeProgress" class="fill tree-fill-color" style="width: 0%;"></div></div>
+            <small id="gardenXpText" style="color: #38bdf8; font-weight:700;">0 / 100 GP</small>
+          </div>
 
-function handleLogout() {
-  localStorage.removeItem("bg_remembered_session");
-  localStorage.removeItem("bg_user_guest_session_active");
-  location.reload();
-}
+          <div class="garden-actions">
+            <button class="btn-click unified-btn action-btn water-btn" data-tooltip="Tiêu hao 1 bình nước kích hoạt sinh trưởng cây (+20 GP)" onclick="careTree('water')">💧 Tưới Nước</button>
+            <button class="btn-click unified-btn action-btn fertilizer-btn" data-tooltip="Tiêu hao 1 bao phân hữu cơ bón rễ (+35 GP)" onclick="careTree('fertilizer')">🍂 Bón Phân</button>
+          </div>
+        </div>
 
-// --- CLOUD SYNC ENGINE (LƯU TRỮ TRỰC TIẾP LÊN SERVER PHỤC VỤ CHƠI TRÊN MỌI THIẾT BỊ) ---
-async function saveStateToStorage() {
-  if (!currentUserData) return;
-  if (isGuestModeActive) {
-    localStorage.setItem("bg_user_guest_session_active", JSON.stringify(currentUserData));
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE}/save`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: currentUserData.username, profileData: currentUserData })
-    });
-    if (!response.ok) {
-      console.warn("Đồng bộ đám mây thất bại do phản hồi Server lỗi.");
-    }
-  } catch (err) {
-    console.error("Mất kết nối mạng, tạm thời chưa lưu lên Cloud:", err);
-  }
-}
+        <div class="buff-panel">
+          <h3>✨ Hiệu Ứng Thụ Động Của Thần Mộc</h3>
+          <div class="buff-list">
+            <div class="buff-item" id="buff-lv1"><b>Tier 1 [Mầm Thần]:</b> Khởi tạo hệ sinh thái, mở khóa Danh hiệu "Người Mới".</div>
+            <div class="buff-item" id="buff-lv2"><b>Tier 2 [Cổ Thụ]:</b> Cộng hưởng sinh học +5% EXP. Mở khóa Danh hiệu "Người Làm Vườn".</div>
+            <div class="buff-item" id="buff-lv3"><b>Tier 3 [Bách Khoa]:</b> Chuyển hóa vật chất tăng +5% Xu khi vượt ải thành công.</div>
+            <div class="buff-item" id="buff-lv4"><b>Tier 4 [Phượng Hoàng]:</b> Tự động phục hồi 4 Mạng Sống khi khởi động ngày mới.</div>
+            <div class="buff-item" id="buff-lv5"><b>Tier 5 [Yggdrasil]:</b> Đạt cấp tối thượng. Mở khóa Danh hiệu "Bậc Thầy Sinh Thái".</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-// --- NAVIGATION CORES ---
-function switchTab(tab) {
-  document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
-  document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
-  if (tab === 'world') {
-    document.getElementById('worldTab').style.display = 'block';
-    document.getElementById('zone').style.display = 'none';
-  } else {
-    document.getElementById(`${tab}Tab`).style.display = 'block';
-    if(tab === 'garden') renderGarden();
-  }
-}
-
-function enterWorld(world) {
-  currentWorld = world;
-  document.getElementById("worldTab").style.display = "none";
-  document.getElementById("zone").style.display = "block";
-  document.getElementById("zoneTitle").innerText = world.toUpperCase() + " ELITE ACADEMY";
-  renderZoneNodes();
-}
-
-function back() {
-  document.getElementById("zone").style.display = "none";
-  document.getElementById("worldTab").style.display = "block";
-}
-
-function renderZoneNodes() {
-  const container = document.getElementById("nodeMapContainer");
-  container.innerHTML = "";
-  const maxUnlocked = currentUserData.progress[currentWorld] || 1;
-  const clearedList = currentUserData.clearedNodes[currentWorld] || [];
-
-  for (let i = 1; i <= 100; i++) {
-    const node = document.createElement("div");
-    let isReviewNode = (i % 10 === 0);
-    let isLocked = (i > maxUnlocked);
-    let isAlreadyCleared = clearedList.includes(i);
+<!-- UPGRADED QUIZ MODAL WITH UPPER TASKBAR AND MASCOT -->
+<div class="modal" id="quizModal">
+  <div class="quiz pop-anim dynamic-quiz-box" id="quizDynamicBox">
     
-    node.className = `node-btn ${isReviewNode ? 'review-node' : ''} ${isLocked ? 'locked' : ''} ${isAlreadyCleared ? 'cleared' : ''}`;
-    node.setAttribute("data-tooltip", isReviewNode ? `Bài kiểm tra tổng ôn siêu khó khóa 30 câu hỏi cấp độ ${i}` : `Thử thách học phần màn thứ ${i}`);
-    
-    node.onclick = () => {
-      if (isLocked) {
-        alert(`Ải Cấp ${i} đang bị khóa! Vui lòng hoàn thành tuần tự các ải trước đó.`);
-        return;
-      }
-      startQuest(i, isReviewNode);
-    };
+    <!-- MAIN INTERACTIVE QUIZ INTERFACE -->
+    <div id="quizPlayContent">
+      <div class="quiz-top-bar">
+        <button class="quiz-back-btn" onclick="confirmExitQuiz()" data-tooltip="Hủy bỏ tiến trình trận đấu và quay lại">⬅ Trở lại</button>
+        <div class="quiz-indicators">
+          <span class="ind-item" data-tooltip="Số mạng sống còn lại">❤️ <b id="barLives">3</b></span>
+          <span class="ind-item" data-tooltip="Số dư tiền vàng">💰 <b id="barCoins">0</b></span>
+          <span class="ind-item" data-tooltip="Chuỗi học tập hiện tại">🔥 <b id="barStreak">0</b></span>
+        </div>
+      </div>
 
-    let titleNum = isReviewNode ? `★ ${i}` : i;
-    let labelTag = isReviewNode ? "Tổng Ôn" : (isAlreadyCleared ? "Đã Đạt" : "Sẵn Sàng");
-    if (isLocked) labelTag = "Khóa 🔒";
+      <div class="quiz-header-status">Câu hỏi: <span id="quizIndex">1/10</span> | Học Phần: <span id="quizDiff">MATH</span></div>
+      
+      <div class="quiz-workspace">
+        <div class="quiz-left-core">
+          <div id="quizExBlock" class="quiz-ex-block" style="display: none;"></div>
+          <p id="question" class="question-text question-fade-anim">Đang kết nối cơ sở dữ liệu...</p>
+          
+          <!-- TWO COLUMN ANSWER GRID (AB - CD) -->
+          <div class="answers-column-grid" id="answersContainer"></div>
+        </div>
+        
+        <!-- INTELLECTUAL MASCOT INTERFACE -->
+        <div class="quiz-mascot-wrapper">
+          <div class="mascot-avatar character-sway">🧠<span>✨</span></div>
+          <div class="mascot-bubble" id="mascotBubble">Cố lên nhé sĩ tử, tư duy logic sẽ đưa ta tới thành công!</div>
+        </div>
+      </div>
+    </div>
 
-    node.innerHTML = `<div class="num">${titleNum}</div><div class="tag">${labelTag}</div>`;
-    container.appendChild(node);
-  }
-}
+    <!-- HỆ THỐNG BẢNG TỔNG KẾT SAU KHI HOÀN THÀNH MÀN CHƠI (SUMMARY PANEL) -->
+    <div id="quizSummaryContent" style="display: none; text-align: center; padding: 10px;">
+      <div class="summary-icon">🏆</div>
+      <h2 class="summary-title">BẢNG TỔNG KẾT THÀNH TÍCH</h2>
+      <p class="summary-subtitle" id="summarySubText">Học phần hoàn thành xuất sắc!</p>
+      
+      <div class="summary-stats-box">
+        <div class="sum-stat-card"><span class="sum-lbl">✅ Trả Lời Đúng</span><span class="sum-val text-green" id="sumCorrectCount">0</span></div>
+        <div class="sum-stat-card"><span class="sum-lbl">❌ Trả Lời Sai</span><span class="sum-val text-red" id="sumWrongCount">0</span></div>
+        <div class="sum-stat-card"><span class="sum-lbl">🪙 Xu Nhận Được</span><span class="sum-val text-gold" id="sumCoinsEarned">+0</span></div>
+        <div class="sum-stat-card"><span class="sum-lbl">⚡ Kinh Nghiệm</span><span class="sum-val text-blue" id="sumXpEarned">+0</span></div>
+      </div>
+      
+      <button class="btn-click unified-btn auth-submit-btn w-100" style="margin-top: 24px;" onclick="closeSummaryAndExit()">Xác Nhận & Trở Lại Map 🏠</button>
+    </div>
 
-// --- TASKBAR SYNCHRONIZER IN QUEST ---
-function syncQuizTopBarHUD() {
-  document.getElementById("barLives").innerText = currentUserData.lives;
-  document.getElementById("barCoins").innerText = currentUserData.coins;
-  document.getElementById("barStreak").innerText = currentUserData.streakCount;
-}
+  </div>
+</div>
 
-function confirmExitQuiz() {
-  if (confirm("Bạn có chắc chắn muốn thoát trận đấu? Tiến trình của cấp độ này sẽ không được tính điểm.")) {
-    closeModal('quizModal');
-  }
-}
+<!-- ANONYMOUS FEEDBACK MODAL -->
+<div class="modal" id="feedbackModal">
+  <div class="quiz pop-anim" style="width: 440px; max-width: 95vw;">
+    <h2>📨 Gửi Phản Hồi Ẩn Danh</h2>
+    <p style="font-size: 0.8rem; color: #94a3b8; margin-top: 4px; margin-bottom: 16px;">
+      Đóng góp ý kiến của bạn trực tiếp đến hệ thống qua hòm thư điều hành. Thông tin định danh tài khoản của bạn sẽ được giữ mật hoàn toàn.
+    </p>
+    <div class="auth-form" style="text-align: left;">
+      <label style="font-size: 0.85rem; font-weight: 700; color: #cbd5e1; display: block; margin-bottom: 6px;">Nội dung phản hồi:</label>
+      <textarea id="feedbackTextarea" placeholder="Nhập lỗi hệ thống, góp ý câu hỏi hoặc đề xuất tính năng mới tại đây..." style="width:100%; height:120px; background:#020617; border:1px solid rgba(255,255,255,0.08); border-radius:12px; color:#fff; padding:12px; outline:none; resize:none; font-size:0.9rem;"></textarea>
+    </div>
+    <div style="display: flex; gap: 10px; margin-top: 18px;">
+      <button class="btn-click unified-btn secondary-btn" style="flex:1;" onclick="closeModal('feedbackModal')">Hủy</button>
+      <button class="btn-click unified-btn auth-submit-btn" style="flex:2;" onclick="submitFeedbackSystem()">Gửi Đi Nâng Cấp 🚀</button>
+    </div>
+  </div>
+</div>
 
-function startQuest(level, isReview) {
-  activeLevel = level;
-  isReviewBattleMode = isReview;
-  currentQuestionIndex = 1;
-  activePool = generateProceduralQuestions(currentWorld, level, isReview);
-  totalQuestionsInQuest = activePool.length;
-  
-  activeSessionStats = { correct: 0, wrong: 0, coinsEarned: 0, xpEarned: 0 };
-  
-  document.getElementById("quizPlayContent").style.display = "block";
-  document.getElementById("quizSummaryContent").style.display = "none";
-  
-  setupNextABCDQuestion();
-  document.getElementById("quizModal").style.display = "flex";
-}
+<!-- SETTINGS MODAL -->
+<div class="modal" id="settingsModal">
+  <div class="quiz pop-anim">
+    <h2>⚙️ Cài Đặt Hệ Thống V11.0</h2>
+    <div class="setting-item" style="display:flex; justify-content:space-between; margin-top:20px;">
+      <label>🔊 Âm thanh phản hồi hiệu ứng:</label>
+      <input type="checkbox" id="soundToggle" checked style="width:20px; height:20px;">
+    </div>
+    <button class="btn-click unified-btn secondary-btn w-100" onclick="closeModal('settingsModal')" style="margin-top:20px;">Xác Nhận & Đóng</button>
+  </div>
+</div>
 
-function setupNextABCDQuestion() {
-  const gridContainer = document.getElementById("answersContainer");
-  const qTextElement = document.getElementById("question");
-  
-  gridContainer.classList.remove("disabled-lock");
-  
-  qTextElement.classList.remove("question-fade-anim");
-  void qTextElement.offsetWidth; 
-  qTextElement.classList.add("question-fade-anim");
+<!-- DAILY MISSIONS MODAL -->
+<div class="modal" id="missionsModal">
+  <div class="quiz pop-anim">
+    <h2>⚔️ Nhiệm Vụ Hằng Ngày</h2>
+    <div class="mission-list" style="text-align:left; margin-top:15px; display:flex; flex-direction:column; gap:10px;">
+      <div class="m-item"><span>📝 Trả lời đúng tích lũy câu hỏi</span> <span class="reward-tag">🎁 +20 Coin</span></div>
+      <div class="m-item"><span>🔥 Vượt qua cấp độ mới bất kỳ</span> <span class="reward-tag">🎁 +2 Nước</span></div>
+    </div>
+    <button class="btn-click unified-btn secondary-btn w-100" onclick="closeModal('missionsModal')" style="margin-top:20px;">Đóng</button>
+  </div>
+</div>
 
-  document.getElementById("quizIndex").innerText = `${currentQuestionIndex}/${totalQuestionsInQuest}`;
-  document.getElementById("quizDiff").innerText = `${currentWorld.toUpperCase()} - CẤP ${activeLevel}`;
+<!-- ACHIEVEMENTS & TITLES MODAL -->
+<div class="modal" id="achievementsModal">
+  <div class="quiz pop-anim">
+    <h2>🏆 Hệ Thống Danh Hiệu Học Viện</h2>
+    <div class="title-showcase-list" id="titleShowcaseContainer">
+      <div class="t-showcase-item unlocked"><b>🎖️ Người Mới</b> <p>Đã kích hoạt khi gia nhập học viện thành công.</p></div>
+      <div class="t-showcase-item locked" id="titleShowcaseLvl2"><b>🌿 Người Làm Vườn</b> <p>Mở khóa khi Cây Thần đạt Tiến hóa Tier 2 trở lên.</p></div>
+      <div class="t-showcase-item locked" id="titleShowcaseLvl5"><b>👑 Bậc Thầy Sinh Thái</b> <p>Mở khóa khi Cây Thần đạt Tiến hóa tối thượng Tier 5.</p></div>
+      <div class="t-showcase-item coming-soon"><b>✨ Coming Soon...</b> <p>Hàng loạt danh hiệu vinh quang ẩn đang được phát triển.</p></div>
+    </div>
+    <button class="btn-click unified-btn secondary-btn w-100" onclick="closeModal('achievementsModal')" style="margin-top:20px;">Đóng</button>
+  </div>
+</div>
 
-  syncQuizTopBarHUD();
-  refreshMascotSpeech(); 
+<div class="watermark">made by Pham Giac Nguyen</div>
 
-  const qData = activePool[currentQuestionIndex - 1];
-  qTextElement.innerText = qData.q;
-  
-  const exBlock = document.getElementById("quizExBlock");
-  if (qData.ex) {
-    exBlock.innerHTML = `<div class="ex-badge">Ví dụ hỗ trợ tư duy (Ex)</div><div class="ex-body">${qData.ex}</div>`;
-    exBlock.style.display = "block";
-  } else {
-    exBlock.style.display = "none";
-  }
-
-  let optionsArray = [
-    { text: qData.correct, isCorrect: true },
-    { text: qData.wrongs[0], isCorrect: false },
-    { text: qData.wrongs[1], isCorrect: false },
-    { text: qData.wrongs[2], isCorrect: false }
-  ];
-
-  for (let i = optionsArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [optionsArray[i], optionsArray[j]] = [optionsArray[j], optionsArray[i]];
-  }
-
-  gridContainer.innerHTML = "";
-  const columnPrefixes = ["A", "B", "C", "D"];
-
-  optionsArray.forEach((opt, index) => {
-    const btn = document.createElement("button");
-    btn.innerText = `${columnPrefixes[index]}. ${opt.text}`;
-    if (opt.isCorrect) btn.setAttribute("data-is-true", "yes");
-    
-    btn.onclick = () => handleAnswerSubmission(btn, opt.isCorrect);
-    gridContainer.appendChild(btn);
-  });
-}
-
-async function handleAnswerSubmission(selectedButton, isCorrect) {
-  const gridContainer = document.getElementById("answersContainer");
-  gridContainer.classList.add("disabled-lock"); 
-
-  const allButtons = gridContainer.querySelectorAll("button");
-  
-  if (isCorrect) {
-    playSound('success');
-    selectedButton.classList.add("correct-neon");
-    activeSessionStats.correct++;
-  } else {
-    playSound('fail');
-    selectedButton.classList.add("wrong-neon");
-    activeSessionStats.wrong++;
-    allButtons.forEach(b => {
-      if (b.getAttribute("data-is-true") === "yes") {
-        b.classList.add("correct-neon");
-      }
-    });
-    
-    currentUserData.lives--;
-    syncQuizTopBarHUD();
-    
-    if (currentUserData.lives <= 0) {
-      setTimeout(async () => {
-        alert("❤️ Bạn đã cạn kiệt Mạng Sống! Tiến trình màn học bị gián đoạn.");
-        closeModal('quizModal');
-        currentUserData.lives = (currentUserData.garden.level >= 4) ? 4 : 3;
-        await saveStateToStorage();
-        updateStatsUI();
-      }, 1500);
-      return;
-    }
-  }
-
-  setTimeout(async () => {
-    if (currentQuestionIndex < totalQuestionsInQuest) {
-      currentQuestionIndex++;
-      setupNextABCDQuestion();
-    } else {
-      await processQuestVictory();
-    }
-    await saveStateToStorage();
-  }, 1600);
-}
-
-async function processQuestVictory() {
-  await triggerStreakIncrement();
-  const clearedList = currentUserData.clearedNodes[currentWorld] || [];
-  const isFirstTime = !clearedList.includes(activeLevel);
-
-  let baseCoins = isReviewBattleMode ? 100 : 40;
-  let baseXp = isReviewBattleMode ? 150 : 35;
-  
-  if (currentUserData.garden.level >= 2) baseXp = Math.round(baseXp * 1.05);
-  if (currentUserData.garden.level >= 3) baseCoins = Math.round(baseCoins * 1.05);
-
-  if (isFirstTime) {
-    clearedList.push(activeLevel);
-    currentUserData.clearedNodes[currentWorld] = clearedList;
-    
-    currentUserData.water += isReviewBattleMode ? 5 : 2;
-    currentUserData.coins += baseCoins;
-    currentUserData.xp += baseXp;
-    
-    activeSessionStats.coinsEarned = baseCoins;
-    activeSessionStats.xpEarned = baseXp;
-  } else {
-    activeSessionStats.coinsEarned = 0;
-    activeSessionStats.xpEarned = 0;
-  }
-
-  if (activeLevel === currentUserData.progress[currentWorld] && currentUserData.progress[currentWorld] < 100) {
-    currentUserData.progress[currentWorld]++;
-  }
-  
-  let requiredUserXp = getRequiredXpForUser(currentUserData.level);
-  if (currentUserData.xp >= requiredUserXp) {
-    currentUserData.xp -= requiredUserXp;
-    currentUserData.level++;
-    showToast("Tăng Cấp Học Viên Học Viện! 🚀", `Chúc mừng bạn đã tiến hóa lên cấp độ thế giới Level ${currentUserData.level}`, "👑", "#3b82f6");
-  }
-  
-  document.getElementById("quizPlayContent").style.display = "none";
-  document.getElementById("quizSummaryContent").style.display = "block";
-  
-  document.getElementById("sumCorrectCount").innerText = activeSessionStats.correct;
-  document.getElementById("sumWrongCount").innerText = activeSessionStats.wrong;
-  document.getElementById("sumCoinsEarned").innerText = `+${activeSessionStats.coinsEarned} Xu`;
-  document.getElementById("sumXpEarned").innerText = `+${activeSessionStats.xpEarned} XP`;
-  
-  if (isFirstTime) {
-    document.getElementById("summarySubText").innerText = "Chúc mừng bạn đã vượt qua thử thách học phần thành công!";
-  } else {
-    document.getElementById("summarySubText").innerText = "Học lại hoàn thành! Các ải đã thông không phát thêm xu/kinh nghiệm.";
-  }
-
-  await saveStateToStorage();
-}
-
-function closeSummaryAndExit() {
-  closeModal('quizModal');
-  if (document.getElementById("zone").style.display === "block") renderZoneNodes();
-  updateStatsUI();
-  syncWorldProgressFill();
-  renderTitlesModalData();
-}
-
-// --- RENDER & REFRESH TITLES AND ACHIEVEMENTS SYSTEM ---
-function renderTitlesModalData() {
-  if (!currentUserData) return;
-  const gLvl = currentUserData.garden.level || 1;
-  const badgeElement = document.getElementById("userTitleBadge");
-  
-  const t2 = document.getElementById("titleShowcaseLvl2");
-  const t5 = document.getElementById("titleShowcaseLvl5");
-  
-  let activeTitle = "Người Mới";
-  
-  if (gLvl >= 2) {
-    if(t2) { t2.classList.remove("locked"); t2.classList.add("unlocked"); }
-    activeTitle = "Người Làm Vườn";
-  }
-  if (gLvl >= 5) {
-    if(t5) { t5.classList.remove("locked"); t5.classList.add("unlocked"); }
-    activeTitle = "Bậc Thầy Sinh Thái";
-  }
-  
-  if(badgeElement) {
-    badgeElement.innerText = activeTitle;
-  }
-}
-
-// --- GARDEN EVOLUTION SYSTEM ---
-function renderGarden() {
-  const lvl = currentUserData.garden.level || 1;
-  
-  const treeTiers = [
-    { name: "🌱 Mầm Thần Khai Sáng", desc: "Aura xanh nhạt khơi mào dòng chảy tri thức.", icon: "🌱" },
-    { name: "🌿 Cổ Thụ Thức Tỉnh", desc: "Cấu trúc sinh học tiến hóa, hấp thu hạt dữ liệu nền tảng.", icon: "🌿" },
-    { name: "🌳 Đại Thụ Tri Thức", desc: "Tán lá ba chiều Hologram phát sáng rực rỡ góc trời sinh thái.", icon: "🌳" },
-    { name: "🌸 Hoa Vương Tinh Vân", desc: "Tinh vân Nebula nở rộ, giải phóng dòng hạt năng lượng tư duy.", icon: "🌸" },
-    { name: "👑 Thần Mộc Yggdrasil", desc: "Cấp độ tối cao! Kết nối toàn bộ tri thức đa vũ trụ vĩnh hằng.", icon: "👑✨" }
-  ];
-  
-  const currentTier = treeTiers[lvl - 1] || treeTiers[4];
-  const reqGp = getRequiredGpForTree(lvl);
-
-  document.getElementById("gardenLvlText").innerText = lvl;
-  document.getElementById("treeStage").innerText = currentTier.icon;
-  document.getElementById("treeName").innerText = currentTier.name;
-  document.getElementById("treeDesc").innerText = currentTier.desc;
-  
-  document.getElementById("treeProgress").style.width = `${Math.min(100, (currentUserData.garden.exp / reqGp) * 100)}%`;
-  document.getElementById("gardenXpText").innerText = `${currentUserData.garden.exp} / ${reqGp} GP`;
-
-  document.querySelectorAll(".buff-item").forEach(el => el.classList.remove("active"));
-  for (let i = 1; i <= lvl; i++) {
-    const item = document.getElementById(`buff-lv${i}`);
-    if (item) item.classList.add("active");
-  }
-  renderTitlesModalData();
-}
-
-async function careTree(type) {
-  let lvl = currentUserData.garden.level || 1;
-  let reqGp = getRequiredGpForTree(lvl);
-
-  if (type === 'water') {
-    if (currentUserData.water > 0) { currentUserData.water--; currentUserData.garden.exp += 20; }
-    else { alert("Kho trữ nước đã hết, hãy vượt qua ải học tập mới để tích lũy!"); return; }
-  } else {
-    if (currentUserData.fertilizer > 0) { currentUserData.fertilizer--; currentUserData.garden.exp += 35; }
-    else { alert("Hết phân bón sinh học!"); return; }
-  }
-  
-  while (currentUserData.garden.exp >= reqGp && currentUserData.garden.level < 5) {
-    currentUserData.garden.exp -= reqGp;
-    currentUserData.garden.level++;
-    lvl = currentUserData.garden.level;
-    reqGp = getRequiredGpForTree(lvl);
-    showToast(`Thần Mộc Tiến Hóa Tier ${lvl}! 🌿`, `Đạt cấp độ sinh thái mới thành công!`, "🪴", "#10b981");
-  }
-
-  if (currentUserData.garden.level >= 5) {
-    let maxGp = getRequiredGpForTree(5);
-    if (currentUserData.garden.exp >= maxGp) {
-      currentUserData.garden.exp = maxGp;
-      showToast("Đạt Trạng Thái Cực Đại!", "Thần mộc đã đạt tới giới hạn tiến hóa vũ trụ tối cao.", "🌟", "#f59e0b");
-    }
-  }
-
-  renderGarden(); 
-  updateStatsUI(); 
-  await saveStateToStorage();
-}
-
-// --- ANONYMOUS FEEDBACK SYSTEM ---
-function submitFeedbackSystem() {
-  const content = document.getElementById("feedbackTextarea").value.trim();
-  if (!content) {
-    alert("Vui lòng điền nội dung đóng góp trước khi gửi phản hồi!");
-    return;
-  }
-  
-  const mailtoAddress = "nguyenphamgiac@gmail.com";
-  const emailSubject = encodeURIComponent("Brain Garden V11.0 - Ý Kiến Đóng Góp Phát Triển Hệ Thống");
-  const emailBody = encodeURIComponent(`[HỆ THỐNG PHẢN HỒI ẨN DANH NGƯỜI DÙNG]\n\nNội dung ý kiến đóng góp:\n----------------------\n${content}\n----------------------\n\n(Hệ thống tự động bảo mật hoàn toàn danh tính và mật khẩu người gửi)`);
-  
-  window.open(`mailto:${mailtoAddress}?subject=${emailSubject}&body=${emailBody}`, '_blank');
-  
-  document.getElementById("feedbackTextarea").value = "";
-  closeModal('feedbackModal');
-  showToast("Cổng Mail Kích Hoạt! 📨", "Yêu cầu phản hồi đã được chuyển qua trình duyệt ẩn danh.", "✔️", "#10b981");
-}
-
-// --- HUD RENDERING SYNCHRONIZER ---
-function updateStatsUI() {
-  if (!currentUserData) return;
-  document.getElementById("coins").innerText = currentUserData.coins;
-  document.getElementById("lives").innerText = currentUserData.lives;
-  document.getElementById("streak").innerText = currentUserData.streakCount;
-  document.getElementById("water").innerText = currentUserData.water;
-  document.getElementById("fertilizer").innerText = currentUserData.fertilizer;
-  document.getElementById("freezeCount").innerText = currentUserData.freezeCount;
-  document.getElementById("userLevel").innerText = `Level ${currentUserData.level}`;
-  
-  const reqXp = getRequiredXpForUser(currentUserData.level);
-  document.getElementById("xpFill").style.width = `${(currentUserData.xp / reqXp) * 100}%`;
-  document.getElementById("xpText").innerText = `${Math.round(currentUserData.xp)} / ${reqXp} XP`;
-}
-
-function syncWorldProgressFill() {
-  ['math', 'eng', 'hist', 'iq', 'chem'].forEach(subj => {
-    const lv = currentUserData.progress[subj] || 1;
-    const bar = document.getElementById(`progress-${subj}`);
-    if(bar) bar.style.width = `${((lv - 1) / 100) * 100}%`;
-  });
-}
-
-function openModal(id) { document.getElementById(id).style.display = "flex"; }
-function closeModal(id) { document.getElementById(id).style.display = "none"; }
-
-// --- KHÔI PHỤC PHIÊN LÀM VIỆC TỪ ĐẦM MÂY KHI LOAD TRANG AUTOMATION ---
-window.onload = async function() {
-  initFallingLeaves(); 
-  
-  const rememberedUser = localStorage.getItem("bg_remembered_session");
-  if (rememberedUser) {
-    if (rememberedUser === "guest_session_active") {
-      isGuestModeActive = true;
-      const data = localStorage.getItem("bg_user_guest_session_active");
-      if (data) { currentUserData = JSON.parse(data); bootstrapAppView(); }
-    } else {
-      // Tìm thấy phiên đăng nhập cũ -> fetch dữ liệu tươi mới từ máy chủ Vercel về máy hiện tại
-      try {
-        const response = await fetch(`${API_BASE}/load?username=${encodeURIComponent(rememberedUser)}`);
-        if (response.ok) {
-          const resData = await response.json();
-          currentUserData = resData.profileData;
-          bootstrapAppView();
-        } else {
-          // Nếu server lỗi hoặc không tìm thấy, ép đăng nhập lại
-          document.getElementById("authOverlay").style.display = "flex";
-        }
-      } catch (err) {
-        console.error("Lỗi đồng bộ Cloud lúc khởi động, tải data backup cục bộ nếu có", err);
-        document.getElementById("authOverlay").style.display = "flex";
-      }
-    }
-  } else {
-    document.getElementById("authOverlay").style.display = "flex";
-  }
-};
+<script src="script.js"></script>
+</body>
+</html>

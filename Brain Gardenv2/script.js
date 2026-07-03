@@ -1,3 +1,7 @@
+// --- CONFIGURATION CENTRALIZED SERVER API ---
+// Thay đổi URL này thành domain API .vercel.app thực tế của ông sau khi deploy thành công nhé!
+const API_BASE = "https://brain-gardenv1.vercel.app/api"; 
+
 // --- AUDIO ENGINE V2 CLEAN AUTOMATION ---
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
 const audioActiveRegistry = new Set(); 
@@ -67,7 +71,7 @@ function refreshMascotSpeech() {
   }
 }
 
-// --- HIỆU ỨNG LÁ RỤNG MÀN HÌNH CHỜ AUTOMATION 🌱 ---
+// --- HIỆU ỨNG LÁ RỤNG 🌱 ---
 function initFallingLeaves() {
   const container = document.getElementById("leavesContainer");
   if (!container) return;
@@ -103,7 +107,7 @@ function showToast(title, text, icon = "🎁", borderType = "#2563eb") {
   }, 3500);
 }
 
-// --- STATE MANAGEMENT ENGINE V11.0 ---
+// --- STATE MANAGEMENT ENGINE V12.0 HYBRID ---
 let currentWorld = "";
 let currentQuestionIndex = 0;
 let totalQuestionsInQuest = 10;
@@ -113,7 +117,6 @@ let isReviewBattleMode = false;
 let activePool = [];
 let isGuestModeActive = false; 
 
-// Biến cục bộ lưu trữ dữ liệu phiên chạy hiện tại để phục vụ bảng tổng kết (Summary Box)
 let activeSessionStats = { correct: 0, wrong: 0, coinsEarned: 0, xpEarned: 0 };
 
 function createNewUserProgress(username, nickname) {
@@ -154,7 +157,7 @@ function verifyDailyResetAndStreak() {
   }
 }
 
-function triggerStreakIncrement() {
+async function triggerStreakIncrement() {
   const todayStr = new Date().toISOString().split('T')[0];
   if (currentUserData.lastStudiedDate !== todayStr) {
     currentUserData.streakCount++;
@@ -171,7 +174,7 @@ function triggerStreakIncrement() {
       }
     }
   }
-  saveStateToStorage();
+  await saveStateToStorage();
 }
 
 function handleGuestLogin() {
@@ -180,10 +183,10 @@ function handleGuestLogin() {
   localStorage.setItem("bg_remembered_session", "guest_session_active");
   localStorage.setItem("bg_user_guest_session_active", JSON.stringify(currentUserData));
   bootstrapAppView();
-  showToast("Chế Độ Khách Kích Hoạt! 👥", "Bạn đang trải nghiệm nhanh. Hãy đăng ký tài khoản để lưu dữ liệu vĩnh viễn.", "🔓", "#0ea5e9");
+  showToast("Chế Độ Khách Kích Hoạt! 👥", "Bạn đang trải nghiệm nhanh. Hãy đăng ký tài khoản để lưu dữ liệu đám mây.", "🔓", "#0ea5e9");
 }
 
-// --- HIGH DIFFICULTY PROCEDURAL QUESTIONS ENGINE (LỚP 8/9 CHUẨN XÁC) ---
+// --- HIGH DIFFICULTY PROCEDURAL QUESTIONS ENGINE ---
 function generateProceduralQuestions(world, level, isReview = false) {
   let list = [];
   let count = isReview ? 30 : 10;
@@ -193,36 +196,35 @@ function generateProceduralQuestions(world, level, isReview = false) {
     
     if (world === 'math') {
       let types = [
-        { q: `Cho hình thang cân ABCD (AB // CD) có số đo góc A bằng ${105 + (seed%10)}°. Tính số đo góc C chính xác của hình thang?`, a: `${75 - (seed%10)}°`, wrongs: [`${105 + (seed%10)}°`, "90°", "180°"], ex: "Trong hình thang cân, hai góc đối diện bù nhau, tổng bằng 180°." },
-        { q: `Tam giác ABC có AB = ${4 + (seed%3)} cm, AC = ${8 + (seed%3)} cm. Đường phân giác trong góc A cắt BC tại D. Tính tỷ số độ dài cạnh DB / DC?`, a: "0.5", wrongs: ["2.0", "0.75", "1.25"], ex: "Đường phân giác của một góc trong tam giác chia cạnh đối diện thành hai đoạn thẳng tỷ lệ với hai cạnh kề." },
-        { q: `Định lý Thales: Cho tam giác ABC, một đường thẳng song song với cạnh BC cắt AB tại D và AC tại E. Biết AD = ${3 + (seed%2)} cm, DB = 3 cm, AE = 6 cm. Tính độ dài đoạn EC?`, a: `${parseFloat((18 / (3+(seed%2))).toFixed(2))} cm`, wrongs: ["4.0 cm", "2.5 cm", "5.0 cm"], ex: "Theo định lý Thales trong tam giác: AD/DB = AE/EC." }
+        { q: `Cho hình thang cân ABCD (AB // CD) có số đo góc A bằng ${105 + (seed%10)}°. Tính số đo góc C chính xác của hình thang?`, a: `${75 - (seed%10)}°`, wrongs: [`${105 + (seed%10)}°`, "90°", "180°"], ex: "In isosceles trapezoid, consecutive interior angles are supplementary." },
+        { q: `Tam giác ABC có AB = ${4 + (seed%3)} cm, AC = ${8 + (seed%3)} cm. Đường phân giác trong góc A cắt BC tại D. Tính tỷ số độ dài cạnh DB / DC?`, a: "0.5", wrongs: ["2.0", "0.75", "1.25"], ex: "The angle bisector theorem states that an angle bisector divides the opposite side into elements proportional to the adjacent sides." },
+        { q: `Định lý Thales: Cho tam giác ABC, một đường thẳng song song với cạnh BC cắt AB tại D và AC tại E. Biết AD = ${3 + (seed%2)} cm, DB = 3 cm, AE = 6 cm. Tính độ dài đoạn EC?`, a: `${parseFloat((18 / (3+(seed%2))).toFixed(2))} cm`, wrongs: ["4.0 cm", "2.5 cm", "5.0 cm"], ex: "According to Thales theorem: AD/DB = AE/EC." }
       ];
       let choice = types[seed % types.length];
       list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
     }
     else if (world === 'chem') {
       let types = [
-        { q: `Đốt cháy hoàn toàn khí Mêtan (CH₄) trong bình chứa Ôxi dư. Xác định tổng các hệ số cân bằng tối giản của phương trình hóa học?`, a: "6", wrongs: ["5", "4", "7"], ex: "Phản ứng: CH₄ + 2O₂ → CO₂ + 2H₂O. Tổng hệ số: 1 + 2 + 1 + 2 = 6." },
-        { q: `Tính số mol nguyên tử tinh khiết chứa trong khối lượng ${(16.8 + (seed%3)*5.6).toFixed(1)} gam Sắt (Fe = 56)?`, a: `${((16.8 + (seed%3)*5.6) / 56).toFixed(2)} mol`, wrongs: ["0.20 mol", "0.50 mol", "1.00 mol"], ex: "Áp dụng công thức tính toán: n = m / M." }
+        { q: `Đốt cháy hoàn toàn khí Mêtan (CH₄) trong bình chứa Ôxi dư. Xác định tổng các hệ số cân bằng tối giản của phương trình hóa học?`, a: "6", wrongs: ["5", "4", "7"], ex: "Reaction: CH₄ + 2O₂ → CO₂ + 2H₂O. Sum: 1 + 2 + 1 + 2 = 6." },
+        { q: `Tính số mol nguyên tử tinh khiết chứa trong khối lượng ${(16.8 + (seed%3)*5.6).toFixed(1)} gam Sắt (Fe = 56)?`, a: `${((16.8 + (seed%3)*5.6) / 56).toFixed(2)} mol`, wrongs: ["0.20 mol", "0.50 mol", "1.00 mol"], ex: "Formula: n = m / M." }
       ];
       let choice = types[seed % types.length];
       list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
     }
     else if (world === 'eng') {
       let types = [
-        { q: `Identify the grammatical error in the statement: 'The multi-layered tectonic plates moves incredibly slow across the mantle.'`, a: "moves (should be move)", wrongs: ["slow", "across", "multi-layered"], ex: "Chủ ngữ số nhiều 'plates' yêu cầu động từ số nhiều 'move' ở thì hiện tại đơn." },
-        { q: `Choose the correct logical conjunction: 'The advanced laboratory experiment failed twice, ___ the engineering team refused to give up.'`, a: "yet", wrongs: ["because", "so", "or"], ex: "'Yet' biểu thị mối quan hệ tương phản mang tính logic cao giữa hai vế." }
+        { q: `Identify the grammatical error in the statement: 'The multi-layered tectonic plates moves incredibly slow across the mantle.'`, a: "moves (should be move)", wrongs: ["slow", "across", "multi-layered"], ex: "Plural subject 'plates' requires plural verb 'move'." },
+        { q: `Choose the correct logical conjunction: 'The advanced laboratory experiment failed twice, ___ the engineering team refused to give up.'`, a: "yet", wrongs: ["because", "so", "or"], ex: "'Yet' presents a logical contrast between clauses." }
       ];
       let choice = types[seed % types.length];
       list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
     }
     else if (world === 'hist') {
-      // VIẾT HOA ĐỊA DANH, SỰ KIỆN LỚN, ANH HÙNG DÂN TỘC CHUẨN XÁC CHƯƠNG TRÌNH LỚP 8/9
       let types = [
-        { q: `Sự kiện lịch sử lớn nào diễn ra từ năm 1914 đến năm 1918 mở đầu cho cuộc cục diện thế giới mới, mang tính chất đế quốc chủ nghĩa phi nghĩa?`, a: "Chiến tranh Thế giới I", wrongs: ["Chiến tranh Thế giới II", "Cách mạng Tháng Mười Nga", "Chiến tranh Giành Độc lập Bắc Mỹ"], ex: "Chiến tranh Thế giới I diễn ra từ năm 1914 đến năm 1918 giữa khối Liên minh và khối Hiệp ước." },
-        { q: `Sự kiện bùng nổ năm 1939 và kết thúc vào năm 1945 với sự thất bại hoàn toàn của khối Phát xít Đức, Ý, Nhật được gọi là gì?`, a: "Chiến tranh Thế giới II", wrongs: ["Chiến tranh Thế giới I", "Chiến tranh Lạnh", "Cách mạng Tư sản Pháp"], ex: "Chiến tranh Thế giới II bùng nổ ngày 1/9/1939 khi Đức tấn công Ba Lan và kết thúc năm 1945." },
-        { q: `Dưới sự lãnh đạo tài tình của Đảng và Chủ tịch Hồ Chí Minh, cuộc tổng khởi nghĩa nào năm 1945 đã đập tan xiềng xích thực dân phát xít khai sinh ra nước Việt Nam Dân chủ Cộng hòa?`, a: "Cách mạng Tháng Tám", wrongs: ["Khởi nghĩa Yên Bái", "Phong trào Xô viết Nghệ Tĩnh", "Chiến dịch Điện Biên Phủ"], ex: "Cách mạng Tháng Tám năm 1945 giành chính quyền về tay nhân dân toàn quốc." },
-        { q: `Vị anh hùng dân tộc nào đã lãnh đạo nghĩa quân Lam Sơn đánh bại hoàn toàn quân xâm lược nhà Minh, giành lại độc lập và lập ra vương triều Hậu Lê?`, a: "Lê Lợi", wrongs: ["Trần Hưng Đạo", "Quang Trung", "Nguyễn Trãi"], ex: "Anh hùng Lê Lợi lãnh đạo cuộc khởi nghĩa Lam Sơn (1418 - 1427) thắng lợi hoàn toàn." }
+        { q: `Sự kiện lịch sử lớn nào diễn ra từ năm 1914 đến năm 1918 mở đầu cho cuộc cục diện thế giới mới, mang tính chất đế quốc chủ nghĩa phi nghĩa?`, a: "Chiến tranh Thế giới I", wrongs: ["Chiến tranh Thế giới II", "Cách mạng Tháng Mười Nga", "Chiến tranh Giành Độc lập Bắc Mỹ"], ex: "World War I lasted from 1914 to 1918." },
+        { q: `Sự kiện bùng nổ năm 1939 và kết thúc vào năm 1945 với sự thất bại hoàn toàn của khối Phát xít Đức, Ý, Nhật được gọi là gì?`, a: "Chiến tranh Thế giới II", wrongs: ["Chiến tranh Thế giới I", "Chiến tranh Lạnh", "Cách mạng Tư sản Pháp"], ex: "World War II ended in 1945 with Fascist defeat." },
+        { q: `Dưới sự lãnh đạo tài tình của Đảng và Chủ tịch Hồ Chí Minh, cuộc tổng khởi nghĩa nào năm 1945 đã đập tan xiềng xích thực dân phát xít khai sinh ra nước Việt Nam Dân chủ Cộng hòa?`, a: "Cách mạng Tháng Tám", wrongs: ["Khởi nghĩa Yên Bái", "Phong trào Xô viết Nghệ Tĩnh", "Chiến dịch Điện Biên Phủ"], ex: "August Revolution established the independent nation." },
+        { q: `Vị anh hùng dân tộc nào đã lãnh đạo nghĩa quân Lam Sơn đánh bại hoàn toàn quân xâm lược nhà Minh, giành lại độc lập và lập ra vương triều Hậu Lê?`, a: "Lê Lợi", wrongs: ["Trần Hưng Đạo", "Quang Trung", "Nguyễn Trãi"], ex: "Hero Le Loi led the Lam Son uprising victoriously." }
       ];
       let choice = types[seed % types.length];
       list.push({ q: choice.q, correct: choice.a, wrongs: choice.wrongs, ex: choice.ex });
@@ -235,14 +237,14 @@ function generateProceduralQuestions(world, level, isReview = false) {
       list.push({
         q: `Giải mã ma trận chuỗi số logic tăng trưởng cấp số cộng sau: ${s1}, ${s2}, ${s3}, ${s4}, [?]. Số cần tìm điền vào dấu hỏi chấm là:`,
         correct: `${ansVal}`, wrongs: [`${ansVal + diffVal}`, `${ansVal - 1}`, `${ansVal * 2}`],
-        ex: `Quy luật giải mã chuỗi số logic: Số sau bằng số trước cộng thêm một khoảng cách giá trị hằng số cố định là +${diffVal}.`
+        ex: `Arithmetic progression distance is +${diffVal}.`
       });
     }
   }
   return list;
 }
 
-// --- AUTH CORES CONTROLLER ---
+// --- AUTH CORES CONTROLLER (FIXED HYBRID FOR BOTH CLOUD & LOCAL STORAGE) ---
 function switchAuthTab(tab) {
   document.getElementById('tabLogin').classList.remove('active');
   document.getElementById('tabSignup').classList.remove('active');
@@ -257,29 +259,87 @@ function switchAuthTab(tab) {
   }
 }
 
-function handleAuth(mode) {
+async function handleAuth(mode) {
   if (mode === 'signup') {
     const nick = document.getElementById("signupNickname").value.trim();
     const user = document.getElementById("signupUser").value.trim();
     const pass = document.getElementById("signupPass").value.trim();
     if (!nick || !user || !pass) { alert("Vui lòng điền đủ trường!"); return; }
-    if (localStorage.getItem(`bg_user_${user}`)) { alert("Email này đã tồn tại trên dữ liệu!"); return; }
     
     const freshData = createNewUserProgress(user, nick);
-    localStorage.setItem(`bg_user_${user}`, JSON.stringify(freshData));
-    alert("Đăng ký hồ sơ thành công! Hãy đăng nhập.");
-    switchAuthTab('login');
+    
+    try {
+      showToast("Đang xử lý...", "Gửi yêu cầu khởi tạo tài khoản lên Cloud", "⏳", "#3b82f6");
+      const response = await fetch(`${API_BASE}/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: pass, profileData: freshData })
+      });
+      
+      const resData = await response.json();
+      if (!response.ok) { throw new Error(resData.message || "Lỗi tạo tài khoản Cloud."); }
+      
+      alert("Đăng ký hồ sơ Cloud thành công! Hãy tiến hành đăng nhập.");
+      switchAuthTab('login');
+    } catch (err) {
+      // 🔥 CỨU NGUY: Tự chuyển sang lưu Offline vào ổ cứng nếu bị lỗi Fetch chặn bảo mật
+      console.warn("Không kết nối được Server Cloud, tự động tạo tài khoản dạng Local Offline!", err);
+      
+      let localDB = JSON.parse(localStorage.getItem("bg_local_db") || "{}");
+      if (localDB[user]) {
+        alert("Tài khoản Gmail này đã được tạo cục bộ trên máy này từ trước!");
+        return;
+      }
+      
+      localDB[user] = { password: pass, profileData: freshData };
+      localStorage.setItem("bg_local_db", JSON.stringify(localDB));
+      
+      isGuestModeActive = false;
+      currentUserData = freshData;
+      localStorage.setItem("bg_remembered_session", user);
+      
+      alert("Kích hoạt tài khoản Offline thành công! Tiến vào Học Viện...");
+      bootstrapAppView();
+    }
   } else {
     const user = document.getElementById("loginUser").value.trim();
     const pass = document.getElementById("loginPass").value.trim();
-    const records = localStorage.getItem(`bg_user_${user}`);
-    if (!records) { alert("Tài khoản chưa được kích hoạt trên hệ thống!"); return; }
+    if (!user || !pass) { alert("Vui lòng điền thông tin đăng nhập!"); return; }
     
-    isGuestModeActive = false;
-    currentUserData = JSON.parse(records);
-    localStorage.setItem("bg_remembered_session", user);
-    bootstrapAppView();
-    showToast("Đăng Nhập Thành Công! 🎉", `Chào mừng quay trở lại, dữ liệu an toàn.`, "🔑", "#2563eb");
+    try {
+      showToast("Đang xác thực...", "Kết nối máy chủ kiểm tra", "🔐", "#3b82f6");
+      const response = await fetch(`${API_BASE}/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username: user, password: pass })
+      });
+      
+      const resData = await response.json();
+      if (!response.ok) { throw new Error(resData.message || "Mật khẩu hoặc tài khoản sai."); }
+      
+      isGuestModeActive = false;
+      currentUserData = resData.profileData; 
+      localStorage.setItem("bg_remembered_session", user); 
+      
+      bootstrapAppView();
+      showToast("Đăng Nhập Thành Công! 🎉", `Đã đồng bộ dữ liệu từ Server Cloud về máy này.`, "🔑", "#2563eb");
+    } catch (err) {
+      // 🔥 CỨU NGUY: Đọc database offline trong máy nếu không gọi được mạng
+      console.warn("Lỗi mạng, đang tìm kiếm thông tin tài khoản Offline dưới máy...");
+      let localDB = JSON.parse(localStorage.getItem("bg_local_db") || "{}");
+      const account = localDB[user];
+      
+      if (account && account.password === pass) {
+        isGuestModeActive = false;
+        currentUserData = account.profileData;
+        localStorage.setItem("bg_remembered_session", user);
+        
+        bootstrapAppView();
+        showToast("Đăng Nhập Offline! 📂", "Đăng nhập bằng bản sao lưu cục bộ thành công.", "✔️", "#10b981");
+      } else {
+        alert("Đăng nhập thất bại: Tài khoản không chính xác hoặc máy chủ đang bảo trì!");
+      }
+    }
   }
 }
 
@@ -287,8 +347,14 @@ function bootstrapAppView() {
   document.getElementById("authOverlay").style.display = "none";
   document.getElementById("mainApp").style.display = "flex";
   
-  document.getElementById("displayUsername").innerText = currentUserData.nickname || "Garden Keeper";
-  document.getElementById("displayAccount").innerText = currentUserData.username;
+  // FIX CHÍ MẠNG: Khử hoàn toàn chữ 'undefined' lỗi hiển thị tên
+  let userNickname = currentUserData.nickname;
+  if (!userNickname || userNickname === "undefined") {
+    userNickname = currentUserData.username ? currentUserData.username.split('@')[0] : "Garden Keeper";
+  }
+  
+  document.getElementById("displayUsername").innerText = userNickname;
+  document.getElementById("displayAccount").innerText = currentUserData.username || "";
   
   if (currentUserData.avatar) {
     document.getElementById("avatarImg").src = currentUserData.avatar;
@@ -304,13 +370,13 @@ document.getElementById('avatarInput').addEventListener('change', function(e) {
   const file = e.target.files[0];
   if (file) {
     const reader = new FileReader();
-    reader.onload = function(uploadEvent) {
+    reader.onload = async function(uploadEvent) {
       const base64Str = uploadEvent.target.result;
       document.getElementById('avatarImg').src = base64Str;
       if (currentUserData) {
         currentUserData.avatar = base64Str;
-        saveStateToStorage();
-        showToast("Đã Lưu Avatar! 📷", "Ảnh đại diện cá nhân đã được đồng bộ vĩnh viễn.", "✔️", "#10b981");
+        await saveStateToStorage();
+        showToast("Đã Lưu Avatar! 📷", "Ảnh đại diện cá nhân đã được đồng bộ hóa.", "✔️", "#10b981");
       }
     };
     reader.readAsDataURL(file);
@@ -319,15 +385,37 @@ document.getElementById('avatarInput').addEventListener('change', function(e) {
 
 function handleLogout() {
   localStorage.removeItem("bg_remembered_session");
+  localStorage.removeItem("bg_user_guest_session_active");
   location.reload();
 }
 
-function saveStateToStorage() {
+// --- CLOUD & LOCAL DUAL SYNC ENGINE ---
+async function saveStateToStorage() {
   if (!currentUserData) return;
+  
+  // Luôn ghi đè một bản backup an toàn vào ổ cứng máy tính trước
+  if (currentUserData.username && !isGuestModeActive) {
+    let localDB = JSON.parse(localStorage.getItem("bg_local_db") || "{}");
+    if (localDB[currentUserData.username]) {
+      localDB[currentUserData.username].profileData = currentUserData;
+      localStorage.setItem("bg_local_db", JSON.stringify(localDB));
+    }
+  }
+
   if (isGuestModeActive) {
     localStorage.setItem("bg_user_guest_session_active", JSON.stringify(currentUserData));
-  } else {
-    localStorage.setItem(`bg_user_${currentUserData.username}`, JSON.stringify(currentUserData));
+    return;
+  }
+  
+  // Đồng bộ song song lên đám mây Vercel
+  try {
+    const response = await fetch(`${API_BASE}/save`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: currentUserData.username, profileData: currentUserData })
+    });
+  } catch (err) {
+    console.warn("Tạm thời ghi nhớ tiến trình chơi ở bộ nhớ Offline cục bộ.");
   }
 }
 
@@ -359,6 +447,7 @@ function back() {
 
 function renderZoneNodes() {
   const container = document.getElementById("nodeMapContainer");
+  if (!container) return;
   container.innerHTML = "";
   const maxUnlocked = currentUserData.progress[currentWorld] || 1;
   const clearedList = currentUserData.clearedNodes[currentWorld] || [];
@@ -389,7 +478,7 @@ function renderZoneNodes() {
   }
 }
 
-// --- UPGRADED TASKBAR SYNCHRONIZER IN QUEST ---
+// --- TASKBAR SYNCHRONIZER IN QUEST ---
 function syncQuizTopBarHUD() {
   document.getElementById("barLives").innerText = currentUserData.lives;
   document.getElementById("barCoins").innerText = currentUserData.coins;
@@ -409,7 +498,6 @@ function startQuest(level, isReview) {
   activePool = generateProceduralQuestions(currentWorld, level, isReview);
   totalQuestionsInQuest = activePool.length;
   
-  // Reset thống kê phiên chơi hiện tại phục vụ bảng tổng kết cuối màn
   activeSessionStats = { correct: 0, wrong: 0, coinsEarned: 0, xpEarned: 0 };
   
   document.getElementById("quizPlayContent").style.display = "block";
@@ -419,13 +507,11 @@ function startQuest(level, isReview) {
   document.getElementById("quizModal").style.display = "flex";
 }
 
-// HỆ THỐNG XÁO TRỘN ĐÁP ÁN ĐỘNG TRÁNH TRÙNG LẶP CHUỖI ĐÁP ÁN ĐÚNG 🎲
 function setupNextABCDQuestion() {
   const gridContainer = document.getElementById("answersContainer");
   const qTextElement = document.getElementById("question");
   
   gridContainer.classList.remove("disabled-lock");
-  
   qTextElement.classList.remove("question-fade-anim");
   void qTextElement.offsetWidth; 
   qTextElement.classList.add("question-fade-anim");
@@ -454,7 +540,6 @@ function setupNextABCDQuestion() {
     { text: qData.wrongs[2], isCorrect: false }
   ];
 
-  // Thuật toán xáo trộn Fisher-Yates loại bỏ triệt để trùng lặp vị trí đáp án đúng liên tiếp
   for (let i = optionsArray.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [optionsArray[i], optionsArray[j]] = [optionsArray[j], optionsArray[i]];
@@ -473,7 +558,7 @@ function setupNextABCDQuestion() {
   });
 }
 
-function handleAnswerSubmission(selectedButton, isCorrect) {
+async function handleAnswerSubmission(selectedButton, isCorrect) {
   const gridContainer = document.getElementById("answersContainer");
   gridContainer.classList.add("disabled-lock"); 
 
@@ -497,30 +582,30 @@ function handleAnswerSubmission(selectedButton, isCorrect) {
     syncQuizTopBarHUD();
     
     if (currentUserData.lives <= 0) {
-      setTimeout(() => {
+      setTimeout(async () => {
         alert("❤️ Bạn đã cạn kiệt Mạng Sống! Tiến trình màn học bị gián đoạn.");
         closeModal('quizModal');
         currentUserData.lives = (currentUserData.garden.level >= 4) ? 4 : 3;
-        saveStateToStorage();
+        await saveStateToStorage();
         updateStatsUI();
       }, 1500);
       return;
     }
   }
 
-  setTimeout(() => {
+  setTimeout(async () => {
     if (currentQuestionIndex < totalQuestionsInQuest) {
       currentQuestionIndex++;
       setupNextABCDQuestion();
     } else {
-      processQuestVictory();
+      await processQuestVictory();
     }
-    saveStateToStorage();
+    await saveStateToStorage();
   }, 1600);
 }
 
-function processQuestVictory() {
-  triggerStreakIncrement();
+async function processQuestVictory() {
+  await triggerStreakIncrement();
   const clearedList = currentUserData.clearedNodes[currentWorld] || [];
   const isFirstTime = !clearedList.includes(activeLevel);
 
@@ -556,7 +641,6 @@ function processQuestVictory() {
     showToast("Tăng Cấp Học Viên Học Viện! 🚀", `Chúc mừng bạn đã tiến hóa lên cấp độ thế giới Level ${currentUserData.level}`, "👑", "#3b82f6");
   }
   
-  // HIỂN THỊ BẢNG TỔNG KẾT THÀNH TÍCH MÀN CHƠI THAY VÌ TỰ ĐỘNG ĐÓNG MODAL ĐỘT NGỘT
   document.getElementById("quizPlayContent").style.display = "none";
   document.getElementById("quizSummaryContent").style.display = "block";
   
@@ -571,7 +655,7 @@ function processQuestVictory() {
     document.getElementById("summarySubText").innerText = "Học lại hoàn thành! Các ải đã thông không phát thêm xu/kinh nghiệm.";
   }
 
-  saveStateToStorage();
+  await saveStateToStorage();
 }
 
 function closeSummaryAndExit() {
@@ -607,11 +691,10 @@ function renderTitlesModalData() {
   }
 }
 
-// --- GARDEN EVOLUTION SYSTEM (ĐÃ FIX LỖI KẸT LEVEL 1 TRÊN HÌNH CỦA FILE "image_c150a3.jpg") ---
+// --- GARDEN EVOLUTION SYSTEM ---
 function renderGarden() {
   const lvl = currentUserData.garden.level || 1;
   
-  // Làm sạch tên tổng thể của các cây thần, gọn gàng, giữ tiếng Anh chuẩn hóa không kiêu ngạo
   const treeTiers = [
     { name: "🌱 Mầm Thần Khai Sáng", desc: "Aura xanh nhạt khơi mào dòng chảy tri thức.", icon: "🌱" },
     { name: "🌿 Cổ Thụ Thức Tỉnh", desc: "Cấu trúc sinh học tiến hóa, hấp thu hạt dữ liệu nền tảng.", icon: "🌿" },
@@ -639,7 +722,7 @@ function renderGarden() {
   renderTitlesModalData();
 }
 
-function careTree(type) {
+async function careTree(type) {
   let lvl = currentUserData.garden.level || 1;
   let reqGp = getRequiredGpForTree(lvl);
 
@@ -651,8 +734,6 @@ function careTree(type) {
     else { alert("Hết phân bón sinh học!"); return; }
   }
   
-  // FIX CHẶT CHẼ LOGIC THĂNG CẤP DỰA TRÊN ẢNH "image_c150a3.jpg"
-  // Vòng lặp while xử lý an toàn nếu điểm GP tích lũy vượt mức yêu cầu, chuyển cấp mượt mà
   while (currentUserData.garden.exp >= reqGp && currentUserData.garden.level < 5) {
     currentUserData.garden.exp -= reqGp;
     currentUserData.garden.level++;
@@ -661,7 +742,6 @@ function careTree(type) {
     showToast(`Thần Mộc Tiến Hóa Tier ${lvl}! 🌿`, `Đạt cấp độ sinh thái mới thành công!`, "🪴", "#10b981");
   }
 
-  // Nếu cây đã chạm đỉnh cấp tối thượng Tier 5, chặn tích lũy tràn dòng
   if (currentUserData.garden.level >= 5) {
     let maxGp = getRequiredGpForTree(5);
     if (currentUserData.garden.exp >= maxGp) {
@@ -672,10 +752,10 @@ function careTree(type) {
 
   renderGarden(); 
   updateStatsUI(); 
-  saveStateToStorage();
+  await saveStateToStorage();
 }
 
-// --- HỆ THỐNG PHẢN HỒI ẨN DANH AN TOÀN BẢO MẬT (FEEDBACK SYSTEM VIA GMAIL) ---
+// --- ANONYMOUS FEEDBACK SYSTEM ---
 function submitFeedbackSystem() {
   const content = document.getElementById("feedbackTextarea").value.trim();
   if (!content) {
@@ -683,17 +763,13 @@ function submitFeedbackSystem() {
     return;
   }
   
-  // Encode chuỗi an toàn mã hóa tránh làm lộ thông tin mật của người học
   const mailtoAddress = "nguyenphamgiac@gmail.com";
   const emailSubject = encodeURIComponent("Brain Garden V11.0 - Ý Kiến Đóng Góp Phát Triển Hệ Thống");
-  const emailBody = encodeURIComponent(`[HỆ THỐNG PHẢN HỒI ẨN DANH NGƯỜI DÙNG]\n\nNội dung ý kiến đóng góp:\n----------------------\n${content}\n----------------------\n\n(Hệ thống tự động bảo mật hoàn toàn danh tính và mật khẩu người gửi)`);
+  const emailBody = encodeURIComponent(`[HỆ THỐNG PHẢN HỒI ẨN DANH NGƯỜI DÙNG]\n\nNội dung ý kiến đóng góp:\n----------------------\n${content}\n----------------------`);
   
-  // Kích hoạt cổng mail thông qua thiết bị client
-  window.open(`mailto:${mailtoAddress}?subject=${emailSubject}&body=${emailBody}`, '_blank');
-  
+  window.open(`mailto:${mailtoAddress}?subject=${emailSubject}?body=${emailBody}`, '_blank');
   document.getElementById("feedbackTextarea").value = "";
   closeModal('feedbackModal');
-  showToast("Cổng Mail Kích Hoạt! 📨", "Yêu cầu phản hồi đã được chuyển qua trình duyệt ẩn danh.", "✔️", "#10b981");
 }
 
 // --- HUD RENDERING SYNCHRONIZER ---
@@ -723,8 +799,8 @@ function syncWorldProgressFill() {
 function openModal(id) { document.getElementById(id).style.display = "flex"; }
 function closeModal(id) { document.getElementById(id).style.display = "none"; }
 
-// --- KHÔI PHỤC PHIÊN LÀM VIỆC TỰ ĐỘNG KHỞI CHẠY ---
-window.onload = function() {
+// --- KHÔI PHỤC PHIÊN LÀM VIỆC TỰ ĐỘNG KHỞI ĐỘNG (FIXED HYBRID LOAD) ---
+window.onload = async function() {
   initFallingLeaves(); 
   
   const rememberedUser = localStorage.getItem("bg_remembered_session");
@@ -734,104 +810,29 @@ window.onload = function() {
       const data = localStorage.getItem("bg_user_guest_session_active");
       if (data) { currentUserData = JSON.parse(data); bootstrapAppView(); }
     } else {
-      const data = localStorage.getItem(`bg_user_${rememberedUser}`);
-      if (data) { currentUserData = JSON.parse(data); bootstrapAppView(); }
+      // Thử kết nối lên Cloud Vercel để lấy bản sao lưu mới nhất trước
+      try {
+        const response = await fetch(`${API_BASE}/load?username=${encodeURIComponent(rememberedUser)}`);
+        if (response.ok) {
+          const resData = await response.json();
+          currentUserData = resData.profileData;
+          bootstrapAppView();
+          return; // Thoát hàm nếu tải thành công dữ liệu trực tuyến
+        }
+      } catch (err) {
+        console.log("Đang mở file cục bộ hoặc đứt mạng, chuyển sang cơ chế dự phòng nạp dữ liệu từ máy...");
+      }
+      
+      // HÀM BỌC HẬU CỨU NGUY: Lấy dữ liệu lưu trực tiếp từ ổ cứng nếu Cloud bị lỗi/bị chặn CORS
+      let localDB = JSON.parse(localStorage.getItem("bg_local_db") || "{}");
+      if (localDB[rememberedUser]) {
+        currentUserData = localDB[rememberedUser].profileData;
+        bootstrapAppView();
+      } else {
+        document.getElementById("authOverlay").style.display = "flex";
+      }
     }
   } else {
     document.getElementById("authOverlay").style.display = "flex";
-  }
-};
-function bootstrapAppView() {
-  document.getElementById("authOverlay").style.display = "none";
-  document.getElementById("mainApp").style.display = "flex";
-  
-  // SỬA DÒNG NÀY: Kiểm tra nếu nickname bị undefined hoặc là chuỗi "undefined" thì đổi thành tên mặc định hoặc lấy phần trước của email
-  let userNickname = currentUserData.nickname;
-  if (!userNickname || userNickname === "undefined") {
-    userNickname = currentUserData.username ? currentUserData.username.split('@')[0] : "Garden Keeper";
-  }
-  
-  document.getElementById("displayUsername").innerText = userNickname;
-  document.getElementById("displayAccount").innerText = currentUserData.username || "Chưa đăng nhập";
-  
-  if (currentUserData.avatar) {
-    document.getElementById("avatarImg").src = currentUserData.avatar;
-  }
-  
-  verifyDailyResetAndStreak();
-  updateStatsUI();
-  syncWorldProgressFill();
-  renderTitlesModalData(); 
-}
-// api/index.js (Backend Node.js chạy trên Vercel)
-const usersDatabase = {}; // Lưu tạm trong bộ nhớ (Lưu ý: Khi server ngủ đông dữ liệu sẽ reset, muốn vĩnh viễn cần nối thêm MongoDB/Firebase)
-
-module.exports = async (req, res) => {
-  // Cấu hình CORS để chạy được từ mọi máy, kể cả file cục bộ file:///
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
-
-  const url = req.url;
-
-  // 1. Chức năng Đăng ký (Signup)
-  if (url.includes('/api/signup') && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', () => {
-      const { username, password, profileData } = JSON.parse(body);
-      if (usersDatabase[username]) {
-        return res.status(400).json({ message: "Tài khoản đã tồn tại!" });
-      }
-      usersDatabase[username] = { password, profileData };
-      return res.status(200).json({ message: "Đăng ký thành công!" });
-    });
-  }
-  
-  // 2. Chức năng Đăng nhập (Login)
-  else if (url.includes('/api/login') && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', () => {
-      const { username, password } = JSON.parse(body);
-      const user = usersDatabase[username];
-      if (!user || user.password !== password) {
-        return res.status(400).json({ message: "Sai tài khoản hoặc mật khẩu!" });
-      }
-      return res.status(200).json({ message: "Thành công", profileData: user.profileData });
-    });
-  }
-
-  // 3. Chức năng Lưu dữ liệu (Save)
-  else if (url.includes('/api/save') && req.method === 'POST') {
-    let body = '';
-    req.on('data', chunk => { body += chunk.toString(); });
-    req.on('end', () => {
-      const { username, profileData } = JSON.parse(body);
-      if (usersDatabase[username]) {
-        usersDatabase[username].profileData = profileData;
-        return res.status(200).json({ message: "Đã lưu" });
-      }
-      return res.status(404).json({ message: "Không tìm thấy user" });
-    });
-  }
-
-  // 4. Chức năng Tải dữ liệu tự động (Load)
-  else if (url.includes('/api/load') && req.method === 'GET') {
-    const queryObject = new URL(req.url, `http://${req.headers.host}`).searchParams;
-    const username = queryObject.get('username');
-    const user = usersDatabase[username];
-    if (user) {
-      return res.status(200).json({ profileData: user.profileData });
-    }
-    return res.status(404).json({ message: "Trống" });
-  }
-  
-  else {
-    res.status(404).json({ message: "API Route Not Found" });
   }
 };
