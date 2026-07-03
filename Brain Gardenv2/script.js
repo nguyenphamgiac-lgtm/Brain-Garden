@@ -836,3 +836,74 @@ window.onload = async function() {
     document.getElementById("authOverlay").style.display = "flex";
   }
 };
+// ==========================================
+// 🔑 ĐOẠN CODE XỬ LÝ ĐĂNG KÝ (TẠO TÀI KHOẢN)
+// ==========================================
+async function handleRegister(username, email, password) {
+    const userData = {
+        username: username,
+        email: email,
+        password: password,
+        currentLevel: 1,
+        exp: 0,
+        unlockedSubjects: ["Toán", "Văn", "Anh"] // Tùy theo các môn học của ông
+    };
+
+    try {
+        // Cố gắng gửi lên Cloud trước
+        const response = await fetch(`${API_BASE}/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(userData)
+        });
+        
+        if (response.ok) {
+            alert("🌱 Đăng ký thành công trên Cloud!");
+        }
+    } catch (err) {
+        console.log("⚠️ Server bận, đang chuyển sang chế độ lưu Offline...");
+    }
+
+    // Luôn luôn lưu một bản vào máy máy tính để phòng hờ
+    localStorage.setItem(`bg_user_${email}`, JSON.stringify(userData));
+    localStorage.setItem("bg_remembered_session", email);
+    
+    alert("Kích hoạt tài khoản Offline thành công! Tiến vào Học Viện...");
+    currentUserData = userData;
+    bootstrapAppView(); // Vào game luôn
+}
+
+// ==========================================
+// 🚀 ĐOẠN CODE XỬ LÝ ĐĂNG NHẬP (VÀO HỌC NGAY)
+// ==========================================
+async function handleLogin(email, password) {
+    try {
+        // Thử đăng nhập Online
+        const response = await fetch(`${API_BASE}/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            currentUserData = data.user;
+            localStorage.setItem("bg_remembered_session", email);
+            bootstrapAppView();
+            return;
+        }
+    } catch (err) {
+        console.log("✈️ Không kết nối được Server, đang kiểm tra dữ liệu Offline dưới máy...");
+    }
+
+    // Nếu Server lỗi (Failed to fetch), lục tìm tài khoản trong localStorage của máy
+    const localData = localStorage.getItem(`bg_user_${email}`);
+    if (localData) {
+        currentUserData = JSON.parse(localData);
+        localStorage.setItem("bg_remembered_session", email);
+        alert("🔑 Đăng nhập Offline thành công!");
+        bootstrapAppView(); // Vào game luôn, chấp hết mọi loại lỗi Server!
+    } else {
+        alert("❌ Tài khoản này chưa được tạo trên máy này! Hãy bấm sang tab Tạo Tài Khoản trước nhé.");
+    }
+}
